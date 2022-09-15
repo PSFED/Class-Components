@@ -1,6 +1,8 @@
-import { Fragment, useState, useEffect, Component } from 'react'
+import { Fragment, Component } from 'react'
 import Customers from './Customers'
 import styles from './CustomerFilter.module.css'
+import CustomersContext from '../store/customers-context'
+import ErrorBoundary from './ErrorBoundary'
 
 // class CustomerFilter extends Component {
 //   static contextType = CustomersContext;
@@ -50,35 +52,57 @@ import styles from './CustomerFilter.module.css'
 //   }
 // }
 
-const DUMMY_CUSTOMERS = [
-  { id: 'c1', name: 'Дмитрий' },
-  { id: 'c2', name: 'Михаил' },
-  { id: 'c3', name: 'Ирина' },
-]
+// const DUMMY_CUSTOMERS = [
+//   { id: 'c1', name: 'Дмитрий' },
+//   { id: 'c2', name: 'Михаил' },
+//   { id: 'c3', name: 'Ирина' },
+// ]
 
-const CustomerFilter = () => {
-  const [filteredCustomers, setFilteredCustomers] = useState(DUMMY_CUSTOMERS)
-  const [filter, setFilter] = useState('')
+class CustomerFilter extends Component {
+  static contextType = CustomersContext
 
-  useEffect(() => {
-    setFilteredCustomers(
-      DUMMY_CUSTOMERS.filter((customer) => customer.name.includes(filter))
-    )
-  }, [filter])
-
-  const filterHandler = (event) => {
-    setFilter(event.target.value)
+  constructor() {
+    super()
+    this.state = {
+      filteredCustomers: [],
+      filter: '',
+    }
   }
 
-  return (
-    <Fragment>
-      <div className={styles.filter}>
-        <input type="search" onChange={filterHandler} />
-      </div>
+  componentDidMount() {
+    this.setState({
+      filteredCustomers: this.context.customers,
+    })
+  }
 
-      <Customers customers={filteredCustomers} />
-    </Fragment>
-  )
+  componentDidUpdate(prevProps, prevState) {
+    if (prevState.filter !== this.state.filter) {
+      this.setState({
+        filteredCustomers: this.context.customers.filter((customer) =>
+          customer.name.includes(this.state.filter)
+        ),
+      })
+    }
+  }
+
+  filterHandler = (event) => {
+    this.setState({
+      filter: event.target.value,
+    })
+  }
+
+  render() {
+    return (
+      <Fragment>
+        <div className={styles.filter}>
+          <input type="search" onChange={this.filterHandler.bind(this)} />
+        </div>
+        <ErrorBoundary>
+          <Customers customers={this.state.filteredCustomers} />
+        </ErrorBoundary>
+      </Fragment>
+    )
+  }
 }
 
 export default CustomerFilter

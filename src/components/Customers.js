@@ -1,6 +1,4 @@
-import { render } from '@testing-library/react'
-import { useState } from 'react'
-import { Component } from 'react/cjs/react.development'
+import { Component } from 'react'
 import Customer from './Customer'
 
 import styles from './Customers.module.css'
@@ -19,6 +17,18 @@ class Customers extends Component {
       someState: 'Foo',
     }
   }
+
+  componentDidUpdate() {
+    try {
+      someCodeWithPotentialErrors()
+    } catch (error) {
+      
+    }
+    if (this.props.customers.length === 0) {
+      throw new Error('No customers!')
+    }
+  }
+
   toggleCustomersHandler() {
     this.setState((curState) => {
       return { showCustomers: !curState.showCustomers }
